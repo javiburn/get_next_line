@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "get_next_line.h"
 
+
 /*
 char *temp(int fd)
 {
