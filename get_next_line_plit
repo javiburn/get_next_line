@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include "get_next_line.h"
+
+static int	ft_checkpos(char *str)
+{
+	int 		n;
+
+	n = 0;
+	while (str[n] != '\0' && str[n] != '\n')
+		n++;
+	if (str[n] == '\n')
+		return (n);
+	return (-1);
+}
+
+static char	*ft_reading(int fd)
+{
+	static char	*buf;
+	char		*toret;
+	ssize_t		hello;
+
+	if (fd == -1)
+		return (NULL);
+	else
+	{
+		buf = (char *)malloc(BUFFER_SIZE * sizeof(char) + 1);
+		hello = read(fd, buf, BUFFER_SIZE);
+		if (hello == 0)
+			return (NULL);
+	}
+	toret = ft_strdup((const char *)(buf));
+	return (toret);
+}
+
+char	*get_next_line(int fd)
+{
+	static char	**grande;
+	char		*str;
+	char		*ret;
+	static int	i = 0;
+
+	if (!grande)
+		str = ft_substr(ft_reading(fd), 0, BUFFER_SIZE);
+	if (ft_checkpos(str) != -1)
+	{
+		grande = ft_split(str, '\n');
+		i = 0;
+	}
+	while (grande[i])
+	{
+		ret = grande[i];
+		i++;
+		return (ret);
+	}
+	return (ret);
+}
+
+int main()
+{
+	char	*ptr;
+	int fd;
+	int n = 0;
+	//system("leaks -q a.out");
+	fd = open("/Users/jsarabia/C_Cursus/get_next_line/hola.txt", O_RDONLY);
+	while (n < 17)
+	{
+		ptr = get_next_line(fd);
+		printf("Ojo: %s\n", ptr);
+		n++;
+	}
+	//system("leaks -q a.out");
+	return (0);
+}
