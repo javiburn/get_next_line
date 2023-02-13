@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include "get_next_line.h"
 
+
 static int	ft_checkpos(char *str)
 {
 	int 		n;
@@ -27,6 +28,21 @@ static int	ft_checkpos(char *str)
 	if (str[n] == '\n')
 		return (n);
 	return (-1);
+}
+
+static int	ft_lenspace(char *str)
+{
+	int	lenspace;
+	int	nextspace;
+
+	lenspace = 1;
+	nextspace = ft_checkpos(str) + 1;
+	while (str[nextspace] != '\n' && nextspace <= BUFFER_SIZE)
+	{
+		nextspace++;
+		lenspace++;
+	}
+	return (lenspace);
 }
 
 static char	*ft_create(char *str)
@@ -64,22 +80,29 @@ static char	*ft_reading(int fd)
 char	*get_next_line(int fd)
 {
 	char		*temp;
+	char		*temp2;
 	char		*str;
 	static int	check = 0;
+	static int	antlen = 0;
 
 	temp = ft_strdup(ft_reading(fd));
 	if (!temp)
 		return (NULL);
 	if (ft_checkpos(temp) != -1)
 	{
-		str = malloc(BUFFER_SIZE * sizeof(char) + 1);
-		if (check == 0)
-			ft_strlcpy(str, ft_create(temp), ft_checkpos(temp)+ 1);
-		else if (check != 0)
-			ft_strlcpy(str, ft_create(temp), BUFFER_SIZE - ft_checkpos(temp) + 1);
-		check++;
+		str = malloc((antlen + ft_checkpos(temp)) * sizeof(char) + 1);
+		ft_strlcpy(str, ft_create(temp), antlen + ft_checkpos(temp) + 1);
+		antlen = ft_lenspace(temp);
 		free(temp);
 		return (str);
+	}
+	ft_strlcpy(str, temp, BUFFER_SIZE + 1);
+	while (ft_checkpos(temp) == -1)
+	{
+		free(temp2);
+		temp2 = malloc(BUFFER_SIZE * sizeof(char) + 1);
+		temp2 = ft_strdup(ft_reading(fd));
+		ft_strlcpy(str, temp2, BUFFER_SIZE);
 	}
 	//WIT: -queda hacer que se almacene la longitud del string temp
 	//     -queda por poner lo que pasa si no hay \n (que vuelva al bucle)
@@ -91,13 +114,14 @@ int main()
 	char	*ptr;
 	int fd;
 	int n = 0;
-
+	system("leaks -q a.out");
 	fd = open("/Users/jsarabia/C_Cursus/get_next_line/hola.txt", O_RDONLY);
-	while (n < 5)
+	while (n < 7)
 	{
 		ptr = get_next_line(fd);
-		printf("%s\njaja: ", ptr);
+		printf("%s\n", ptr);
 		n++;
 	}
+	system("leaks -q a.out");
 	return (0);
 }
