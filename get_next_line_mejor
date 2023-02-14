@@ -1,0 +1,82 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include "get_next_line.h"
+
+/*
+
+WIT:
+  -Crear una función que me retorne cuando encuentre un salto de línea y almacene el resto en una string "temporal"
+  por así decirlo que luego utilicemos para usarlo como el comienzo del siguiente string.
+
+
+*/
+
+static char	*ft_bufman(char *old_buffer, char *str)
+{
+	char	*aux;
+
+	//aux = ft_calloc(1, 1);
+	aux = ft_strjoin(old_buffer, str);
+	//free(aux);
+	//aux = ft_strdup(newbuf);
+	free(old_buffer);
+	return (aux);
+}
+
+static char	*ft_reading(int fd)
+{
+	ssize_t		hola;
+	static char	*buf;
+	char		*buffer;
+	int			n;
+
+	buffer = ft_calloc(1, 1);
+	n = 0;
+	if (fd == -1)
+		return (NULL);
+	else
+	{
+		buf = (char *)malloc(BUFFER_SIZE * sizeof(char) + 1);
+		hola = read(fd, buf, BUFFER_SIZE);
+		buffer = ft_bufman(buffer, buf);
+		while (hola != 0)
+		{
+			hola = read(fd, buf, BUFFER_SIZE);
+			if (ft_strchr(buf, '\n') != NULL)
+				break ;
+			buffer = ft_bufman(buffer, buf);
+			//printf("%s\n", buffer);
+		}
+		if (hola == 0)
+			return (NULL);
+	}
+	return (buffer);
+}
+
+char	*get_next_line(int fd)
+{
+	char	*s;
+
+	s = ft_reading(fd);
+	return (s);
+}
+
+int main()
+{
+	char	*ptr;
+	int fd;
+	int n = 0;
+	//system("leaks -q a.out");
+	fd = open("/Users/jsarabia/C_Cursus/get_next_line/hola.txt", O_RDONLY);
+	/*while (n < 2)
+	{*/
+		ptr = get_next_line(fd);
+		printf("%s\n", ptr);
+		//n++;
+//	}
+	//system("leaks -q a.out");
+	return (0);
+}
