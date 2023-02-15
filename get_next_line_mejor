@@ -5,23 +5,62 @@
 #include <stdlib.h>
 #include "get_next_line.h"
 
-/*
+static char	*ft_beg(char *s)
+{
+	int		n;
+	char	*beg;
 
-WIT:
-  -Crear una función que me retorne cuando encuentre un salto de línea y almacene el resto en una string "temporal"
-  por así decirlo que luego utilicemos para usarlo como el comienzo del siguiente string.
+	n = 0;
+	while (s[n] != '\0')
+	{
+		if (s[n] == '\n')
+			break ;
+		n++;
+	}
+	if (s[n] != '\0')
+		beg = ft_substr(s, n + 1, ft_strlen(s) - n + 1);
+	if (s[n] == '\0')
+		beg = ft_substr(s, 0, ft_strlen(s));
+	free(s);
+	return (beg);
+}
 
+static char	*ft_strip(char *str, char *full)
+{
+	int			n;
+	char		*ret;
+	static int	index = 0;
 
-*/
+	n = 0;
+	while (str[n] != '\n' && str[n] != '\0')
+	{
+		n++;
+	}
+	n = n + 1;
+	if (full[0] == 0 || index == 0)
+	{
+		ret = (char *)malloc(n * sizeof(char));
+		if (!ret)
+			return (NULL);
+		ft_strlcpy(ret, str, n + 1);
+		index++;
+	}
+	else if (full[0] != 0 || index != 0)
+	{
+		ret = (char *)malloc((ft_strlen(full) + n + 2) * sizeof(char));
+		ft_strlcpy(ret, full, ft_strlen(full) + 1);
+		ft_strlcpy(ret + ft_strlen(full), str, n + 1);
+		//ret[n] = '\0';
+	}
+	free(full);
+	return (ret);
+}
 
 static char	*ft_bufman(char *old_buffer, char *str)
 {
 	char	*aux;
 
-	//aux = ft_calloc(1, 1);
 	aux = ft_strjoin(old_buffer, str);
-	//free(aux);
-	//aux = ft_strdup(newbuf);
 	free(old_buffer);
 	return (aux);
 }
@@ -29,7 +68,7 @@ static char	*ft_bufman(char *old_buffer, char *str)
 static char	*ft_reading(int fd)
 {
 	ssize_t		hola;
-	static char	*buf;
+	char		*buf;
 	char		*buffer;
 	int			n;
 
@@ -40,15 +79,16 @@ static char	*ft_reading(int fd)
 	else
 	{
 		buf = (char *)malloc(BUFFER_SIZE * sizeof(char) + 1);
+		if (!buf)
+			return (NULL);
 		hola = read(fd, buf, BUFFER_SIZE);
 		buffer = ft_bufman(buffer, buf);
 		while (hola != 0)
 		{
 			hola = read(fd, buf, BUFFER_SIZE);
+			buffer = ft_bufman(buffer, buf);
 			if (ft_strchr(buf, '\n') != NULL)
 				break ;
-			buffer = ft_bufman(buffer, buf);
-			//printf("%s\n", buffer);
 		}
 		if (hola == 0)
 			return (NULL);
@@ -58,10 +98,22 @@ static char	*ft_reading(int fd)
 
 char	*get_next_line(int fd)
 {
-	char	*s;
+	char		*s;
+	char		*str;
+	static char	*start;
+	static int	i = 0;
 
+	if (i == 0)
+	{
+		start = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+		if (!start)
+			return (NULL);
+		i++;
+	}
 	s = ft_reading(fd);
-	return (s);
+	str = ft_strip(s, start);
+	start = ft_beg(s);
+	return (str);
 }
 
 int main()
@@ -71,12 +123,12 @@ int main()
 	int n = 0;
 	//system("leaks -q a.out");
 	fd = open("/Users/jsarabia/C_Cursus/get_next_line/hola.txt", O_RDONLY);
-	/*while (n < 2)
-	{*/
+	while (n < 27)
+	{
 		ptr = get_next_line(fd);
-		printf("%s\n", ptr);
-		//n++;
-//	}
+		printf("%s", ptr);
+		n++;
+	}
 	//system("leaks -q a.out");
 	return (0);
 }
