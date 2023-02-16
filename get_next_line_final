@@ -1,0 +1,123 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jsarabia <jsarabia@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/07 16:03:00 by jsarabia          #+#    #+#             */
+/*   Updated: 2023/02/16 15:11:23 by jsarabia         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include "get_next_line.h"
+
+static char	*ft_store(char *r)
+{
+	char	*store;
+	char	*temp;
+
+	temp = ft_strchr(r, '\n');
+	if (!temp)
+		return (NULL);
+	store = ft_substr(temp, 1, ft_strlen(temp) - 1);
+	//printf("STORE: %s\n", store);
+	free(r);
+	return (store);
+}
+
+static char	*ft_returning(char *r)
+{
+	int		n;
+	char	*str;
+
+	n = 0;
+	while (r[n] != '\0' && r[n] != '\n')
+		n++;
+	n = n + 1;
+	str = ft_substr(r, 0, n);
+	if (!str)
+		return (NULL);
+	//printf("STR: %s\nr: %s\n", str, r);
+	return (str);
+}
+
+static char	*ft_bufman(char *buf, char *r)
+{
+	char	*newbuf;
+
+	newbuf = ft_strjoin(r, buf);
+	if (!newbuf)
+	{
+		free(r);
+		return (NULL);
+	}
+	free(r);
+	return (newbuf);
+}
+
+static char	*ft_reading(int fd, char *r)
+{
+	static char	*buf;
+	ssize_t		hola;
+
+	if (r == NULL)
+		r = (char *)ft_calloc(1, 1);
+	buf = (char *)ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	hola = read(fd, buf, BUFFER_SIZE);
+	if (hola < 0)
+	{
+		free(r);
+		return (NULL);
+	}
+	r = ft_bufman(buf, r);
+	while (hola > 0)
+	{
+		if (ft_strchr(buf, '\n') != NULL)
+			break ;
+		hola = read(fd, buf, BUFFER_SIZE);
+		r = ft_bufman(buf, r);
+		if (hola == 0)
+		{
+			free (r);
+			free(buf);
+			return (NULL);
+		}
+	}
+	return (r);
+}
+
+char	*get_next_line(int fd)
+{
+	static char	*r;
+	char		*str;
+
+	if (fd == -1)
+		return (NULL);
+	r = ft_reading(fd, r);
+	str = ft_returning(r);
+	r = ft_store(r);
+	return (str);
+}
+
+int main()
+{
+	char	*ptr;
+	int fd;
+	int n = 0;
+	//system("leaks -q a.out");
+	fd = open("/Users/jsarabia/C_Cursus/get_next_line/hola.txt", O_RDONLY);
+	while (n < 35)
+	{
+		ptr = get_next_line(fd);
+		printf("%s", ptr);
+		n++;
+	}
+	//system("leaks -q a.out");
+	return (0);
+}
