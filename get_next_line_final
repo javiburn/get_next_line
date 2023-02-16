@@ -6,7 +6,7 @@
 /*   By: jsarabia <jsarabia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 16:03:00 by jsarabia          #+#    #+#             */
-/*   Updated: 2023/02/16 15:11:23 by jsarabia         ###   ########.fr       */
+/*   Updated: 2023/02/16 17:50:39 by jsarabia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,11 @@ static char	*ft_store(char *r)
 	char	*store;
 	char	*temp;
 
+	if (ft_strchr(r, '\n') == NULL)
+	{
+		free(r);
+		return (NULL);
+	}
 	temp = ft_strchr(r, '\n');
 	if (!temp)
 		return (NULL);
@@ -37,6 +42,8 @@ static char	*ft_returning(char *r)
 	char	*str;
 
 	n = 0;
+	if (!r)
+		return (NULL);
 	while (r[n] != '\0' && r[n] != '\n')
 		n++;
 	n = n + 1;
@@ -82,12 +89,6 @@ static char	*ft_reading(int fd, char *r)
 			break ;
 		hola = read(fd, buf, BUFFER_SIZE);
 		r = ft_bufman(buf, r);
-		if (hola == 0)
-		{
-			free (r);
-			free(buf);
-			return (NULL);
-		}
 	}
 	return (r);
 }
@@ -102,6 +103,8 @@ char	*get_next_line(int fd)
 	r = ft_reading(fd, r);
 	str = ft_returning(r);
 	r = ft_store(r);
+	if (!r)
+		return (NULL);
 	return (str);
 }
 
@@ -111,13 +114,16 @@ int main()
 	int fd;
 	int n = 0;
 	//system("leaks -q a.out");
-	fd = open("/Users/jsarabia/C_Cursus/get_next_line/hola.txt", O_RDONLY);
-	while (n < 35)
+	fd = open("tfg.txt", O_RDONLY);
+	while (n < 100)
 	{
 		ptr = get_next_line(fd);
+		if (ptr == NULL)
+			break ;
 		printf("%s", ptr);
 		n++;
 	}
 	//system("leaks -q a.out");
 	return (0);
 }
+
