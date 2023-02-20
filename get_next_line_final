@@ -6,15 +6,10 @@
 /*   By: jsarabia <jsarabia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 16:03:00 by jsarabia          #+#    #+#             */
-/*   Updated: 2023/02/16 17:50:39 by jsarabia         ###   ########.fr       */
+/*   Updated: 2023/02/20 16:37:38 by jsarabia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#include <fcntl.h>
-#include <stdlib.h>
 #include "get_next_line.h"
 
 static char	*ft_store(char *r)
@@ -22,16 +17,24 @@ static char	*ft_store(char *r)
 	char	*store;
 	char	*temp;
 
-	if (ft_strchr(r, '\n') == NULL)
+	if (ft_strchr(r, '\n') == NULL && r)
 	{
 		free(r);
 		return (NULL);
 	}
 	temp = ft_strchr(r, '\n');
 	if (!temp)
+	{
+		free(r);
 		return (NULL);
+	}
 	store = ft_substr(temp, 1, ft_strlen(temp) - 1);
-	//printf("STORE: %s\n", store);
+	if (!store)
+	{
+		free(r);
+		free (temp);
+		return (NULL);
+	}
 	free(r);
 	return (store);
 }
@@ -43,14 +46,18 @@ static char	*ft_returning(char *r)
 
 	n = 0;
 	if (!r)
+	{
+		free(r);
 		return (NULL);
+	}
 	while (r[n] != '\0' && r[n] != '\n')
 		n++;
-	n = n + 1;
-	str = ft_substr(r, 0, n);
+	if (r[n] != '\0')
+		n = n + 1;
+	str = ft_calloc(n + 1, sizeof(char));
+	ft_strlcpy(str, r, n + 1);
 	if (!str)
 		return (NULL);
-	//printf("STR: %s\nr: %s\n", str, r);
 	return (str);
 }
 
@@ -58,11 +65,15 @@ static char	*ft_bufman(char *buf, char *r)
 {
 	char	*newbuf;
 
+	if (!r)
+		r = ft_calloc(1, 1);
 	newbuf = ft_strjoin(r, buf);
 	if (!newbuf)
 	{
 		free(r);
-		return (NULL);
+		free(buf);
+		newbuf = ft_calloc(1, 1);
+		return (newbuf);
 	}
 	free(r);
 	return (newbuf);
@@ -70,26 +81,30 @@ static char	*ft_bufman(char *buf, char *r)
 
 static char	*ft_reading(int fd, char *r)
 {
-	static char	*buf;
+	char		*buf;
 	ssize_t		hola;
 
 	if (r == NULL)
 		r = (char *)ft_calloc(1, 1);
 	buf = (char *)ft_calloc(BUFFER_SIZE + 1, sizeof(char));
 	hola = read(fd, buf, BUFFER_SIZE);
-	if (hola < 0)
+	if (hola < 0 || !buf || buf[0] == '\0')
 	{
 		free(r);
+		free(buf);
 		return (NULL);
 	}
 	r = ft_bufman(buf, r);
-	while (hola > 0)
+	while (hola >= 0 && ft_strchr(r, '\n') == NULL)
 	{
-		if (ft_strchr(buf, '\n') != NULL)
-			break ;
 		hola = read(fd, buf, BUFFER_SIZE);
+		if (hola == 0)
+			break ;
 		r = ft_bufman(buf, r);
+		if (ft_strchr(r, '\n') != NULL)
+			break ;
 	}
+	free(buf);
 	return (r);
 }
 
@@ -98,13 +113,16 @@ char	*get_next_line(int fd)
 	static char	*r;
 	char		*str;
 
-	if (fd == -1)
+	if (fd < 0 || BUFFER_SIZE <= 0 || 0 > read(fd, 0, 0))
+	{
+		free(r);
 		return (NULL);
+	}
 	r = ft_reading(fd, r);
+	if (r == NULL)
+		return (NULL);
 	str = ft_returning(r);
 	r = ft_store(r);
-	if (!r)
-		return (NULL);
 	return (str);
 }
 
@@ -114,8 +132,8 @@ int main()
 	int fd;
 	int n = 0;
 	//system("leaks -q a.out");
-	fd = open("tfg.txt", O_RDONLY);
-	while (n < 100)
+	fd = open("hola.txt", O_RDONLY);
+	while (n < 2)
 	{
 		ptr = get_next_line(fd);
 		if (ptr == NULL)
@@ -126,4 +144,3 @@ int main()
 	//system("leaks -q a.out");
 	return (0);
 }
-
