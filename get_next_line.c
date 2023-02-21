@@ -6,7 +6,7 @@
 /*   By: jsarabia <jsarabia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 16:03:00 by jsarabia          #+#    #+#             */
-/*   Updated: 2023/02/21 15:15:50 by jsarabia         ###   ########.fr       */
+/*   Updated: 2023/02/21 15:33:57 by jsarabia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,23 +130,3 @@ char	*get_next_line(int fd)
 	r = ft_store(r);
 	return (str);
 }
-/*
-int main()
-{
-	char	*ptr;
-	int fd;
-	int n = 0;
-	//system("leaks -q a.out");
-	fd = open("hola.txt", O_RDONLY);
-	while (n < 700)
-	{
-		ptr = get_next_line(fd);
-		if (ptr == NULL)
-			break ;
-		printf("%s", ptr);
-		n++;
-	}
-	//system("leaks -q a.out");
-	return (0);
-}
-*/
