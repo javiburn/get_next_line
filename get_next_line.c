@@ -6,7 +6,7 @@
 /*   By: jsarabia <jsarabia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 16:03:00 by jsarabia          #+#    #+#             */
-/*   Updated: 2023/02/21 15:07:29 by jsarabia         ###   ########.fr       */
+/*   Updated: 2023/02/21 15:15:50 by jsarabia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,12 +87,6 @@ static char	*ft_reading(int fd, char *r)
 		r = (char *)ft_calloc(1, 1);
 	buf = (char *)ft_calloc(BUFFER_SIZE + 1, sizeof(char));
 	hola = read(fd, buf, BUFFER_SIZE);
-	if (hola < 0 || ((!buf || buf[0] == '\0' || hola == 0) && !r))
-	{
-		free(r);
-		free(buf);
-		return (NULL);
-	}
 	temp = ft_calloc((int)hola + 1, sizeof(char));
 	ft_strlcpy(temp, buf, (int)hola + 1);
 	while (hola > 0)
