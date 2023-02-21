@@ -130,23 +130,3 @@ char	*get_next_line(int fd)
 	r[fd] = ft_store(r[fd]);
 	return (str);
 }
-/*
-int main()
-{
-	char	*ptr;
-	int fd;
-	int n = 0;
-	//system("leaks -q a.out");
-	fd = open("hola.txt", O_RDONLY);
-	while (n < 700)
-	{
-		ptr = get_next_line(fd);
-		if (ptr == NULL)
-			break ;
-		printf("%s", ptr);
-		n++;
-	}
-	//system("leaks -q a.out");
-	return (0);
-}
-*/
